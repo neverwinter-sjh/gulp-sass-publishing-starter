@@ -6,9 +6,9 @@ const uglify = require("gulp-uglify");
 const autoprefixer = require("gulp-autoprefixer");
 const sourcemaps = require("gulp-sourcemaps");
 const browsersync = require("browser-sync").create();
-// const htmlPartial = require("gulp-html-partial");
-// const fileinclude = require("gulp-file-include");
 const include = require("gulp-html-tag-include");
+const purgecss = require("gulp-purgecss");
+const replace = require("gulp-replace");
 
 const src = {
   sassPath: "sass/**/*.scss",
@@ -33,6 +33,7 @@ gulp.task("sass", () => {
     .pipe(
       sass({
         outputStyle: "compressed",
+        includePaths: ["node_modules"],
       }).on("error", sass.logError)
     )
     .pipe(
@@ -43,6 +44,22 @@ gulp.task("sass", () => {
     .pipe(sourcemaps.write(src.mapPath))
     .pipe(gulp.dest(src.distPath))
     .pipe(browsersync.reload({ stream: true }));
+});
+
+// purge css
+gulp.task("build", async () => {
+  await gulp
+    .src("css/**/*.css")
+    .pipe(
+      purgecss({
+        content: ["html/**/*.html"],
+      })
+    )
+    .pipe(gulp.dest("build/css"));
+  await gulp
+    .src("html/**/*.html")
+    .pipe(replace(/\/css\//g, "/build/css/"))
+    .pipe(gulp.dest("build/html"));
 });
 
 // Start App on Browser
