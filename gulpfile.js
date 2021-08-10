@@ -12,7 +12,7 @@ const include = require("gulp-html-tag-include");
 
 const src = {
   sassPath: "sass/**/*.scss",
-  htmlPath: "src/**/*.html",
+  htmlPath: "src/*.html",
   distPath: "css",
   htmlDistPath: "html",
   mapPath: ".",
@@ -49,6 +49,8 @@ gulp.task("sass", () => {
 gulp.task("browser-sync", () => {
   browsersync.init({
     server: "./",
+    files: "./",
+    watchEvents: ["add", "change"],
   });
 });
 
@@ -57,6 +59,9 @@ gulp.task("watch", () => {
   gulp.watch(src.sassPath, gulp.series("sass"));
   gulp.watch(src.htmlPath, gulp.series("html"));
   gulp.watch("src/**/*.html").on("change", browsersync.reload);
+  gulp.watch("src").on("add", function (path, stats) {
+    gulp.series("html");
+  });
 });
 
 // Run Gulp Magic
